@@ -1,0 +1,123 @@
+    <!-- PANEL PÚBLICO -->
+    <div id="publicGrid" class="grid">
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">💸</span></div>
+        <h3>Registro de Venta</h3>
+        <p>Registra ventas completas.</p>
+        <a class="btn" href="/registro-ventas.html">Ir a app</a>
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📊</span></div>
+        <h3>Base de datos ventas</h3>
+        <p>Consulta historial completo.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1FvUAsQZr8vqh_OOsHsHjHA7RprV_fmuqikm0U_Ja3_M/edit?gid=1077810078#gid=1077810078"
+          >Ir a app</a
+        >
+      </div>
+
+      <!-- ✅ Ventas vs Meta: SOLO ENTRADA A OTRA PÁGINA -->
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📈</span></div>
+        <h3>Ventas vs Meta</h3>
+        <p>Comparativo mensual (meta $10,000).</p>
+        <a class="btn" href="/ventas-vs-meta.html">Ver gráfica</a>
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🎁</span></div>
+        <h3>Plan de Lealtad</h3>
+        <p>Puntos y clientes.</p>
+        <a class="btn" href="/plan-lealtad.html" target="_blank">Ir a app</a>
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📚</span></div>
+        <h3>Base de datos plan de lealtad</h3>
+        <p>Base de datos plan de lealtad.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1thDRVw0qmCBfQdNT2-Crv6RrMAzo-AcwNL9q21pODpA/edit?gid=0#gid=0"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📦</span></div>
+        <h3>Generar Apartados</h3>
+        <p>Crea apartados y anticipo.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycbz4fkeXmAIj-QbyT8IYRvwiortS4b6vSLj66j_Ph5sdfuczU6ATDRWtY9gY717t7r4i/exec"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🗂️</span></div>
+        <h3>Bitácora de Apartados</h3>
+        <p>Status y seguimiento.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?usp=sharing"
+          >Ver bitácora</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🎟️</span></div>
+        <h3>Tickets PDF</h3>
+        <p>Carpeta de tickets.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://drive.google.com/drive/folders/12yvsXrxUYnfr2o0eMx1uBUllkr7to8RK?usp=drive_link"
+          >Abrir carpeta</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🧵</span></div>
+        <h3>Registro de Nueva Prenda</h3>
+        <p>Códigos nuevos.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycbx6OThWWitX9xEANDZEZlC4mbW1k0iTvI8HzqPTPjHcYRvqKykxG3fsk2bIE33z9vOV9w/exec"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">💲</span></div>
+        <h3>Asignar Precios</h3>
+        <p>Define precios finales.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycbxaIZCxNEkIdGcdOU8a5oVqHoIZQ6S9TvhUQBTbhjZfHCczL8zeznFhv35c9AHDApgg/exec"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🧮</span></div>
+        <h3>Calculadora sobre pedidos</h3>
+        <p>Precios estimados.</p>
+        <a class="btn" href="/calculadora-pedidos.html">Ir a app</a>
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🚚</span></div>
+        <h3>Movimientos de ropa</h3>
+        <p>Salidas y entradas con escáner.</p>
+        <a class="btn" href="/movimientos-ropa.html">Ir a app</a>
+      </div>
+    </div>
+

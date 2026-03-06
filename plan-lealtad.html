@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plan de lealtad HarujaGdl</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root{
+      --fondo:#faf6f1;
+      --texto:#383234;
+      --acento:#a7b59e;
+      --gris:#777;
+      --borde:#e9e9e9;
+      --blanco:#ffffff;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body{
+      font-family: Arial, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+      margin:0;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .wrap{
+      max-width:760px;
+      margin:auto;
+      padding:16px 12px 32px;
+    }
+
+    .logoBox{
+      text-align:center;
+      margin-bottom:4px;
+    }
+    .logoBox img{
+      width:clamp(120px, 26vw, 150px);
+    }
+
+    h1{
+      text-align:center;
+      margin:6px 0 18px;
+      color: var(--texto);
+      font-weight:800;
+      letter-spacing:.3px;
+      font-size: clamp(22px, 4.5vw, 28px);
+    }
+
+    .card{
+      background:var(--blanco);
+      border-radius:16px;
+      padding:16px;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
+      margin:10px 0;
+      border:1px solid var(--borde);
+    }
+
+    h2{
+      margin:0 0 10px;
+      font-size:17px;
+      color:var(--texto);
+      font-weight:800;
+    }
+
+    label{
+      font-weight:700;
+      display:block;
+      margin-top:10px;
+      color:var(--texto);
+      font-size:14px;
+    }
+
+    input,select{
+      width:100%;
+      padding:11px;
+      border:1px solid #ddd;
+      border-radius:12px;
+      margin-top:6px;
+      background:#fff;
+      color:var(--texto);
+      outline:none;
+      font-size:16px;
+      line-height:1.2;
+    }
+    input:focus, select:focus{
+      border-color: var(--acento);
+      box-shadow:0 0 0 3px rgba(167,181,158,.25);
+    }
+
+    button{
+      width:100%;
+      padding:14px;
+      background:var(--acento);
+      color:#fff;
+      border:0;
+      border-radius:14px;
+      font-weight:800;
+      margin-top:12px;
+      cursor:pointer;
+      transition:.15s ease;
+      font-size:16px;
+      min-height:48px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    button:hover{ filter:brightness(.97); transform:translateY(-1px); }
+    button:active{ transform:translateY(0); }
+    button[disabled]{ opacity:.6; cursor:not-allowed; transform:none; }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .muted{ color:var(--gris); font-size:13px; }
+
+    /* Tabs */
+    .tabs{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin:6px 0 12px;
+      position:sticky;
+      top:0;
+      background:var(--fondo);
+      padding:6px 0;
+      z-index:50;
+    }
+
+    .tabBtn{
+      background:#fff;
+      color:var(--texto);
+      border:2px solid var(--borde);
+      padding:12px 10px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 2px 6px rgba(0,0,0,.04);
+      transition:.2s ease;
+      text-align:center;
+      font-size:15px;
+      min-height:48px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .tabBtn.active{
+      border-color: var(--acento);
+      background: var(--acento);
+      color:#fff;
+      transform: translateY(-1px);
+      box-shadow:0 6px 12px rgba(0,0,0,.08);
+    }
+
+    .section{ display:none; }
+    .section.active{ display:block; }
+
+    /* resultados scroll */
+    #results{
+      margin-top:8px;
+      max-height:260px;
+      overflow:auto;
+      border-radius:12px;
+      border:1px solid #f0f0f0;
+    }
+
+    .listItem{
+      padding:10px;
+      border-bottom:1px dashed #eee;
+      cursor:pointer;
+      border-radius:10px;
+      font-size:15px;
+    }
+    .listItem:hover{ background:#fafafa; }
+
+    /* TOAST */
+    #toast{
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      background: #c05454;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      box-shadow: 0 8px 20px rgba(0,0,0,.18);
+      z-index: 999999;
+      opacity: 0;
+      transition: opacity .25s ease, transform .25s ease;
+      max-width: 92vw;
+      text-align: center;
+      display:none;
+      letter-spacing:.2px;
+      font-size:15px;
+    }
+    #toast.show{
+      display:block;
+      opacity: 1;
+      transform: translateX(-50%) translateY(-6px);
+    }
+    #toast.success{ background:var(--acento); }
+    #toast.error{ background:#c05454; }
+
+    .spinner{
+      width:16px; height:16px;
+      border:2px solid rgba(255,255,255,.6);
+      border-top-color:#fff;
+      border-radius:50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+
+    @media (max-width: 600px){
+      .wrap{ padding:10px; }
+      .card{ padding:14px; border-radius:14px; }
+      .row{ grid-template-columns:1fr; }
+      .tabs{ grid-template-columns:1fr; }
+      .tabBtn{ font-size:16px; }
+      h2{ font-size:16px; }
+      label{ font-size:13px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div id="toast"></div>
+
+  <div class="logoBox">
+    <img src="/icons/icon-192.png" alt="HarujaGdl" />
+  </div>
+  <h1>Plan de lealtad</h1>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div id="btnNuevo" class="tabBtn active" onclick="showSection('nuevo')">
+      Registrar cliente nuevo
+    </div>
+    <div id="btnClientes" class="tabBtn" onclick="showSection('clientes')">
+      Sumar puntos / Canjear
+    </div>
+  </div>
+
+  <!-- NUEVO CLIENTE -->
+  <div id="secNuevo" class="section active">
+    <div class="card">
+      <h2>Registrar cliente nuevo</h2>
+
+      <label>Nombre*</label>
+      <input id="n_nombre" placeholder="Ej. Sofía Ramírez" />
+
+      <div class="row">
+        <div>
+          <label>Teléfono</label>
+          <input id="n_tel" placeholder="33..." inputmode="tel" />
+        </div>
+        <div>
+          <label>Instagram</label>
+          <input id="n_ig" placeholder="harujagdl" />
+        </div>
+      </div>
+
+      <label>Correo</label>
+      <input id="n_correo" type="email" placeholder="cliente@email.com" />
+
+      <button id="btnCrear" onclick="registerClient()">Crear tarjeta</button>
+      <div id="n_res" class="muted" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <!-- CLIENTES / PUNTOS -->
+  <div id="secClientes" class="section">
+    <div class="card">
+      <h2>Buscar cliente</h2>
+      <input id="q" placeholder="Busca por nombre, tel, IG, correo o ID" oninput="searchClients()" />
+      <div id="results"></div>
+    </div>
+
+    <div class="card" id="cardCompra">
+      <h2>Registrar compra (sumar puntos)</h2>
+
+      <label>ID Cliente*</label>
+      <input id="c_id" placeholder="HCL-0007" />
+
+      <label>Monto de compra*</label>
+      <input id="c_monto" type="number" placeholder="570" inputmode="decimal" />
+
+      <label>Notas (opcional)</label>
+      <input id="c_notas" placeholder="Ej. compra nueva colección" />
+
+      <button id="btnCompra" onclick="addPurchase()">Sumar puntos</button>
+      <div id="c_res" class="muted" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="card" id="cardCanje">
+      <h2>Canjear puntos</h2>
+
+      <label>ID Cliente*</label>
+      <input id="r_id" placeholder="HCL-0007" />
+
+      <label>Premio</label>
+      <select id="r_reward">
+        <option value="150">150 pts → 10% descuento</option>
+        <option value="300">300 pts → $120 descuento</option>
+        <option value="500">500 pts → $250 descuento</option>
+        <option value="800">800 pts → $450 / prenda hasta $499</option>
+      </select>
+
+      <label>Notas (opcional)</label>
+      <input id="r_notas" placeholder="Ej. canje nivel 2" />
+
+      <button id="btnCanje" onclick="redeem()">Canjear</button>
+      <div id="r_res" class="muted" style="margin-top:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ======= CONFIG API =======
+  const API_URL = "https://script.google.com/macros/s/AKfycbxhJEhjk3ISS04cmE9aACiIs5vtlK9-jb1udSRlG8_4tsCS-qPq16AIh4uC0r0Yy2wBTg/exec";
+
+  async function callApi(action, data){
+    const payload = JSON.stringify({ action, data });
+    const body = "payload=" + encodeURIComponent(payload);
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+      },
+      body
+    });
+
+    let json = null;
+    try { json = await res.json(); } catch(_) {}
+
+    if (!res.ok || !json || json.ok === false){
+      const msg = json && json.error ? json.error : "Error en el servidor";
+      throw new Error(msg);
+    }
+    return json.result;
+  }
+
+  // ===== UI HELPERS =====
+  let toastTimer = null;
+  function showToast(msg, type="success"){
+    const t = document.getElementById("toast");
+    if (!t) return;
+    if (toastTimer) clearTimeout(toastTimer);
+
+    t.className = "";
+    t.classList.add(type);
+    t.textContent = msg;
+    t.style.display = "block";
+
+    requestAnimationFrame(() => t.classList.add("show"));
+
+    toastTimer = setTimeout(() => {
+      t.classList.remove("show");
+      setTimeout(() => t.style.display="none", 250);
+    }, 2600);
+  }
+
+  function setLoading(btn, isLoading){
+    if(!btn) return;
+    btn.disabled = isLoading;
+    if(isLoading){
+      btn.dataset._text = btn.textContent;
+      btn.innerHTML = `<div class="spinner"></div> Procesando...`;
+    }else{
+      btn.textContent = btn.dataset._text || btn.textContent;
+    }
+  }
+
+  function showSection(which){
+    const secNuevo = document.getElementById("secNuevo");
+    const secClientes = document.getElementById("secClientes");
+    const btnNuevo = document.getElementById("btnNuevo");
+    const btnClientes = document.getElementById("btnClientes");
+
+    if(which === "nuevo"){
+      secNuevo.classList.add("active");
+      secClientes.classList.remove("active");
+      btnNuevo.classList.add("active");
+      btnClientes.classList.remove("active");
+    }else{
+      secClientes.classList.add("active");
+      secNuevo.classList.remove("active");
+      btnClientes.classList.add("active");
+      btnNuevo.classList.remove("active");
+    }
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  // ===== REGISTRAR CLIENTE =====
+  async function registerClient(){
+    const btn = document.getElementById("btnCrear");
+    const nombre = n_nombre.value.trim();
+    if (!nombre){
+      showToast("Pon el nombre del cliente 🙏", "error");
+      return;
+    }
+
+    setLoading(btn, true);
+    const data = {
+      nombre,
+      telefono: n_tel.value.trim(),
+      instagram: n_ig.value.trim(),
+      correo: n_correo.value.trim()
+    };
+
+    try{
+      const res = await callApi("registerClient", data);
+      n_res.innerHTML =
+        `✅ Cliente creado: <b>${res.id}</b><br>
+         Tarjeta: <a href="${res.qrLink}" target="_blank">${res.qrLink}</a>`;
+      showToast(`✅ Tarjeta creada (${res.id})`,"success");
+
+      n_nombre.value=""; n_tel.value=""; n_ig.value=""; n_correo.value="";
+      n_nombre.focus();
+    }catch(err){
+      console.error(err);
+      n_res.textContent = "❌ " + (err.message || err);
+      showToast("❌ " + (err.message || "Error al crear tarjeta"), "error");
+    }finally{
+      setLoading(btn,false);
+    }
+  }
+
+  // ===== BUSCAR CLIENTES =====
+  let lastSearchList = [];
+  let searchTimer = null;
+
+  function renderResults(list){
+    const cont = document.getElementById("results");
+    if (!list.length){
+      cont.innerHTML = '<div class="muted" style="padding:8px 10px;">Sin coincidencias.</div>';
+      return;
+    }
+    cont.innerHTML = list.map((c,i)=>`
+      <div class="listItem" onclick="fillClientIdx(${i})">
+        <b>${c.nombre || "Sin nombre"}</b> (${c.id})<br>
+        <span class="muted">
+          Tel: ${c.tel || "-"} |
+          IG: @${c.ig || "-"} |
+          ${c.puntos} pts (${c.nivel || ""})
+        </span>
+      </div>
+    `).join("");
+  }
+
+  function searchClients(){
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(async () => {
+      const query = document.getElementById("q").value.trim();
+      if (!query){
+        document.getElementById("results").innerHTML = "";
+        lastSearchList = [];
+        return;
+      }
+
+      try{
+        const list = await callApi("searchClients", { query });
+        lastSearchList = list || [];
+        renderResults(lastSearchList);
+      }catch(err){
+        console.error(err);
+        showToast("❌ Error al buscar clientes: " + (err.message || err), "error");
+      }
+    }, 250);
+  }
+
+  function fillClientIdx(i){
+    const c = lastSearchList[i];
+    if(!c) return;
+
+    document.getElementById("c_id").value = c.id;
+    document.getElementById("r_id").value = c.id;
+    showToast(`Cliente seleccionado: ${c.id}`, "success");
+
+    const compraCard = document.getElementById("cardCompra");
+    compraCard.scrollIntoView({behavior:"smooth", block:"start"});
+    setTimeout(()=> c_monto.focus(), 250);
+  }
+
+  // ===== SUMAR PUNTOS =====
+  async function addPurchase(){
+    const btn = document.getElementById("btnCompra");
+    const data = {
+      id: c_id.value.trim(),
+      monto: Number(c_monto.value || 0),
+      notas: c_notas.value.trim()
+    };
+
+    if(!data.id || data.monto<=0){
+      showToast("Revisa ID y monto 🙏", "error");
+      return;
+    }
+
+    setLoading(btn,true);
+    try{
+      const client = await callApi("addPurchase", data);
+      c_res.innerHTML =
+        `✅ Puntos actualizados. Ahora tiene <b>${client.puntos}</b> pts (${client.nivel}).`;
+      showToast(`✅ Compra registrada. Total: ${client.puntos} pts`,"success");
+
+      c_monto.value=""; c_notas.value="";
+      c_monto.focus();
+    }catch(err){
+      console.error(err);
+      c_res.textContent = "❌ " + (err.message || err);
+      showToast("❌ " + (err.message || "Error al registrar compra"), "error");
+    }finally{
+      setLoading(btn,false);
+    }
+  }
+
+  // ===== CANJEAR =====
+  async function redeem(){
+    const btn = document.getElementById("btnCanje");
+    const data = {
+      id: r_id.value.trim(),
+      rewardPts: Number(r_reward.value),
+      notas: r_notas.value.trim()
+    };
+
+    if(!data.id){
+      showToast("Pon el ID del cliente 🙏", "error");
+      return;
+    }
+
+    setLoading(btn,true);
+    try{
+      const res = await callApi("redeem", data);
+      r_res.innerHTML =
+        `✅ Canje aplicado: <b>${res.reward.label}</b>.
+         Puntos restantes: <b>${res.client.puntos}</b>.`;
+      showToast(`✅ Canje exitoso: ${res.reward.label}`,"success");
+      r_notas.value="";
+    }catch(err){
+      console.error(err);
+      r_res.textContent = "❌ " + (err.message || err);
+      showToast("❌ " + (err.message || "Error al canjear puntos"), "error");
+    }finally{
+      setLoading(btn,false);
+    }
+  }
+
+  // ENTER atajos
+  n_correo?.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ registerClient(); }
+  });
+  c_monto?.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ addPurchase(); }
+  });
+  r_notas?.addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ redeem(); }
+  });
+</script>
+</body>
+</html>

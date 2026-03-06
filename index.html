@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#A7B59E" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Panel HarujaGdl</title>
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- ✅ CONFIG GLOBAL (PWA) -->
+    <!-- Crea este archivo en GitHub (raíz del repo): /config.js
+         window.HARUJA = { API_URL: ".../exec", API_KEY: "harujaTNpwa2025" }
+    -->
+    <script src="/config.js"></script>
+
+    <style>
+      :root {
+        --fondo: #ffffff;
+        --texto: #383234;
+        --acento: #a7b59e;
+        --beige: #faf6f1;
+        --gris: #6b6b6b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background: var(--beige);
+        color: var(--texto);
+        text-align: center;
+      }
+
+      .logo img {
+        max-width: 220px;
+        margin: 28px auto 5px;
+        display: block;
+      }
+
+      h1 {
+        margin-top: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--texto);
+      }
+
+      /* ===== GRIDS ===== */
+
+      .grid,
+      .admin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 22px;
+        padding: 22px;
+        max-width: 900px;
+        margin: auto;
+        text-align: center;
+      }
+
+      .admin-grid {
+        display: none;
+      }
+
+      /* ===== TARJETAS ===== */
+
+      .card,
+      .admin-card {
+        background: #ffffff;
+        padding: 22px 16px 18px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        border: 1px solid #f0f0f0;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        height: 300px;
+      }
+
+      .card:hover,
+      .admin-card:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+      }
+
+      .card--auto {
+        height: auto;
+      }
+
+      /* ===== ICONOS REDONDOS ===== */
+
+      .icon-circle,
+      .admin-icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        margin: 0 auto 12px;
+        transition: transform 0.15s ease;
+      }
+
+      .card:hover .icon-circle,
+      .admin-card:hover .admin-icon-circle {
+        transform: scale(1.05);
+      }
+
+      .emoji,
+      .admin-icon {
+        font-size: 34px;
+      }
+
+      /* ===== BOTONES ===== */
+
+      .btn,
+      .admin-btn {
+        margin-top: auto;
+        display: inline-block;
+        width: 100%;
+        background: var(--acento);
+        padding: 10px 0;
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn:disabled,
+      .admin-btn:disabled {
+        opacity: 0.7;
+        cursor: default;
+      }
+
+      /* ===== ADMIN BUTTON / SECCIÓN ===== */
+
+      .admin-section {
+        max-width: 900px;
+        margin: 10px auto 0;
+        padding: 0 22px;
+        text-align: center;
+      }
+
+      .admin-trigger {
+        background: transparent;
+        border: none;
+        padding: 8px 0;
+        cursor: pointer;
+        font-size: 15px;
+        color: var(--texto);
+        text-decoration: underline;
+      }
+
+      /* ===== OVERLAY CARGANDO ===== */
+
+      .loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(56, 50, 52, 0.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+
+      .loading-box {
+        background: var(--beige, #faf6f1);
+        padding: 16px 20px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        min-width: 220px;
+      }
+
+      .loading-spinner {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 3px solid rgba(167, 181, 158, 0.4);
+        border-top-color: var(--acento, #a7b59e);
+        margin: 0 auto 10px;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ===== TOAST ===== */
+
+      .toast {
+        position: fixed;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: #383234;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        max-width: 90%;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+      }
+
+      .toast--visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+      }
+
+      .toast--success {
+        background: #3a7f4a;
+      }
+
+      .toast--error {
+        background: #b53737;
+      }
+
+      .toast--info {
+        background: #383234;
+      }
+
+      .error-banner {
+        position: fixed;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #b53737;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        max-width: 92%;
+        z-index: 10001;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="logo">
+      <img src="/icons/icon-512.png" alt="HarujaGdl" />
+    </div>
+
+    <h1 id="panelTitle">Panel de Herramientas HarujaGdl</h1>
+    <div id="appError" class="error-banner" role="alert" style="display: none"></div>
+
+    <!-- PANEL PÚBLICO -->
+    <div id="publicGrid" class="grid">
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">💸</span></div>
+        <h3>Registro de Venta</h3>
+        <p>Registra ventas completas.</p>
+        <a class="btn" href="/registro-ventas.html">Ir a app</a>
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📊</span></div>
+        <h3>Base de datos ventas</h3>
+        <p>Consulta historial completo.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1FvUAsQZr8vqh_OOsHsHjHA7RprV_fmuqikm0U_Ja3_M/edit?gid=1077810078#gid=1077810078"
+          >Ir a app</a
+        >
+      </div>
+
+      <!-- ✅ Ventas vs Meta: SOLO ENTRADA A OTRA PÁGINA -->
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📈</span></div>
+        <h3>Ventas vs Meta</h3>
+        <p>Comparativo mensual (meta $10,000).</p>
+        <a class="btn" href="/ventas-vs-meta.html">Ver gráfica</a>
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🎁</span></div>
+        <h3>Plan de Lealtad</h3>
+        <p>Puntos y clientes.</p>
+        <a class="btn" href="/plan-lealtad.html" target="_blank">Ir a app</a>
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📚</span></div>
+        <h3>Base de datos plan de lealtad</h3>
+        <p>Base de datos plan de lealtad.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1thDRVw0qmCBfQdNT2-Crv6RrMAzo-AcwNL9q21pODpA/edit?gid=0#gid=0"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">📦</span></div>
+        <h3>Generar Apartados</h3>
+        <p>Crea apartados y anticipo.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycbz4fkeXmAIj-QbyT8IYRvwiortS4b6vSLj66j_Ph5sdfuczU6ATDRWtY9gY717t7r4i/exec"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🗂️</span></div>
+        <h3>Bitácora de Apartados</h3>
+        <p>Status y seguimiento.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?usp=sharing"
+          >Ver bitácora</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🎟️</span></div>
+        <h3>Tickets PDF</h3>
+        <p>Carpeta de tickets.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://drive.google.com/drive/folders/12yvsXrxUYnfr2o0eMx1uBUllkr7to8RK?usp=drive_link"
+          >Abrir carpeta</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🧵</span></div>
+        <h3>Registro de Nueva Prenda</h3>
+        <p>Códigos nuevos.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycbx6OThWWitX9xEANDZEZlC4mbW1k0iTvI8HzqPTPjHcYRvqKykxG3fsk2bIE33z9vOV9w/exec"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">💲</span></div>
+        <h3>Asignar Precios</h3>
+        <p>Define precios finales.</p>
+        <a
+          class="btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycbxaIZCxNEkIdGcdOU8a5oVqHoIZQ6S9TvhUQBTbhjZfHCczL8zeznFhv35c9AHDApgg/exec"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🧮</span></div>
+        <h3>Calculadora sobre pedidos</h3>
+        <p>Precios estimados.</p>
+        <a class="btn" href="/calculadora-pedidos.html">Ir a app</a>
+      </div>
+
+      <div class="card">
+        <div class="icon-circle"><span class="emoji">🚚</span></div>
+        <h3>Movimientos de ropa</h3>
+        <p>Salidas y entradas con escáner.</p>
+        <a class="btn" href="/movimientos-ropa.html">Ir a app</a>
+      </div>
+    </div>
+
+    <!-- BOTÓN ADMIN -->
+    <div class="admin-section">
+      <button id="adminToggle" class="admin-trigger">🔐 Administrador</button>
+    </div>
+
+    <!-- PANEL ADMIN -->
+    <div id="adminGrid" class="admin-grid">
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📦</span></div>
+        <h4>Apartados</h4>
+        <p>BD apartados Haruja</p>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/17168QLgL2RQpAOoJmckQCnKRTjGcQxZ-_wKQeCptQkE/edit?gid=784913066#gid=784913066"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">🏷️</span></div>
+        <h4>Est. Precios</h4>
+        <p>Estimación de precios</p>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">🧾</span></div>
+        <h4>Códigos</h4>
+        <p>BD creación de códigos</p>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1DFIZc3BvqRSvaPqhBm1Geu4aeZji6zuIAZKpkeplpwU/edit?usp=sharing"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📱</span></div>
+        <h4>Calculadora (BD)</h4>
+        <p>BD calculadora Haruja</p>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1hLSh3sqKAi_BC3t6sWhP4Bl0-qlaZbMXhs9tGa0HU2Q/edit?usp=sharing"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📋</span></div>
+        <h4>Master</h4>
+        <p>BD precios Haruja</p>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1S9mZbcQehmyiwaebh0GKlQQF7HDWLTdvJZFkV-vY_ZA/edit?usp=sharing"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">⚙️</span></div>
+        <h4>Actualizar Master</h4>
+        <p>Corre: códigos nuevos y precios desde Calculadora.</p>
+        <button
+          id="btnPipelineMaster"
+          class="admin-btn"
+          type="button"
+          onclick="ejecutarPipelineMaster()"
+        >
+          Ejecutar actualización
+        </button>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📄</span></div>
+        <h4>BD Tiendanube</h4>
+        <p>Base de datos precios</p>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/1GfXUv-Y143yQJFC-6_kLZH3kT5rid2BLTEFHFKoikyQ/edit?usp=sharing"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
+        <h4>CSV SMP</h4>
+        <p>BD tickets Haruja</p>
+        <a
+          class="admin-btn"
+          target="_blank"
+          href="https://docs.google.com/spreadsheets/d/15ofWXeddksQjaUxpHxSlzq6XrqHsl78CHgcorlBabhI/edit?usp=sharing"
+          >Ir a app</a
+        >
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">💾</span></div>
+        <h4>Generar CSV + IVA</h4>
+        <p>Actualiza la base que usas para SMP / etiquetas.</p>
+        <button
+          id="btnCSVConIVA"
+          class="admin-btn"
+          type="button"
+          onclick="ejecutarCSVConIVA()"
+        >
+          Generar CSV
+        </button>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📈</span></div>
+        <h4>Resumen del día</h4>
+        <p>Ventas, tickets y prendas sin precio.</p>
+        <button class="admin-btn" type="button" onclick="verDashboardHoy()">
+          Ver resumen
+        </button>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">🔎</span></div>
+        <h4>Buscar producto</h4>
+        <p>Consulta rápida en Master por código o descripción.</p>
+        <button
+          class="admin-btn"
+          type="button"
+          onclick="abrirBuscadorProducto()"
+        >
+          Buscar
+        </button>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-icon-circle"><span class="admin-icon">📷</span></div>
+        <h4>Escáner de códigos (beta)</h4>
+        <p>Leer códigos con la cámara (en desarrollo).</p>
+        <a class="admin-btn" href="/scanner.html">Abrir escáner</a>
+      </div>
+    </div>
+
+    <!-- OVERLAY CARGA -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none">
+      <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <div id="loadingMessage">Procesando...</div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast" style="display: none"></div>
+
+    <script>
+      let fatalErrorShown = false;
+
+      function showFatalError(message, error) {
+        if (fatalErrorShown) return;
+        fatalErrorShown = true;
+        console.error(message, error || "");
+        const banner = document.getElementById("appError");
+        if (banner) {
+          banner.textContent =
+            message ||
+            "Ocurrió un error al iniciar la app. Intenta recargar.";
+          banner.style.display = "block";
+        } else {
+          alert(message || "Ocurrió un error al iniciar la app.");
+        }
+      }
+
+      function boot() {
+        window.addEventListener("error", (event) => {
+          showFatalError("La app tuvo un error inesperado.", event.error);
+        });
+
+        window.addEventListener("unhandledrejection", (event) => {
+          showFatalError("La app tuvo un error inesperado.", event.reason);
+        });
+
+        // ✅ Lee config global (config.js)
+        const HARUJA_API_URL =
+          (window.HARUJA && window.HARUJA.API_URL) ||
+          "https://script.google.com/macros/s/AKfycbz51hV2sc5Ho_tBcaygWp1qfcLdeXgsQZ1m7aRV_6CHp80piwEoDfiuBSJXrSMoGFS4/exec";
+
+        const HARUJA_API_KEY =
+          (window.HARUJA && window.HARUJA.API_KEY) || "harujaTNpwa2025";
+
+        console.log("✅ HARUJA_API_URL:", HARUJA_API_URL);
+        console.log("✅ HARUJA_API_KEY:", HARUJA_API_KEY);
+
+        const ADMIN_PASSWORD = "Harujagdl";
+
+        const adminToggle = document.getElementById("adminToggle");
+        const adminGrid = document.getElementById("adminGrid");
+        const publicGrid = document.getElementById("publicGrid");
+        const panelTitle = document.getElementById("panelTitle");
+
+        let adminUnlocked = localStorage.getItem("harujaAdmin") === "true";
+
+        function showAdmin() {
+          if (publicGrid) publicGrid.style.display = "none";
+          if (adminGrid) adminGrid.style.display = "grid";
+          if (panelTitle)
+            panelTitle.textContent = "Panel Administrador HarujaGdl";
+          if (adminToggle) adminToggle.textContent = "⬅️ Volver al panel";
+        }
+
+        function showPublic() {
+          if (publicGrid) publicGrid.style.display = "grid";
+          if (adminGrid) adminGrid.style.display = "none";
+          if (panelTitle)
+            panelTitle.textContent = "Panel de Herramientas HarujaGdl";
+          if (adminToggle) adminToggle.textContent = "🔐 Administrador";
+        }
+
+        if (!adminToggle || !adminGrid || !publicGrid || !panelTitle) {
+          showFatalError(
+            "Faltan elementos del panel. Actualiza la página.",
+            "missing-dom"
+          );
+        }
+
+        if (adminUnlocked) {
+          showAdmin();
+        }
+
+        if (adminToggle) {
+          adminToggle.addEventListener("click", () => {
+            if (!adminUnlocked) {
+              const pass = prompt(
+                "Introduce la contraseña de administrador:"
+              );
+              if (pass === ADMIN_PASSWORD) {
+                adminUnlocked = true;
+                localStorage.setItem("harujaAdmin", "true");
+                showAdmin();
+              } else {
+                showToast("Contraseña incorrecta.", "error");
+              }
+            } else {
+              if (adminGrid && adminGrid.style.display === "grid") {
+                showPublic();
+              } else {
+                showAdmin();
+              }
+            }
+          });
+        }
+
+        // Loader + Toast
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        const loadingMessage = document.getElementById("loadingMessage");
+        const toastEl = document.getElementById("toast");
+        let toastTimeoutId = null;
+
+        function showLoader(message) {
+          if (loadingMessage)
+            loadingMessage.textContent = message || "Procesando...";
+          if (loadingOverlay) loadingOverlay.style.display = "flex";
+        }
+
+        function hideLoader() {
+          if (loadingOverlay) loadingOverlay.style.display = "none";
+        }
+
+        function showToast(message, type = "info") {
+          if (!toastEl) return;
+
+          toastEl.textContent = message || "";
+          toastEl.classList.remove(
+            "toast--success",
+            "toast--error",
+            "toast--info",
+            "toast--visible"
+          );
+
+          if (type === "success") toastEl.classList.add("toast--success");
+          else if (type === "error") toastEl.classList.add("toast--error");
+          else toastEl.classList.add("toast--info");
+
+          toastEl.style.display = "block";
+          requestAnimationFrame(() => {
+            toastEl.classList.add("toast--visible");
+          });
+
+          if (toastTimeoutId) clearTimeout(toastTimeoutId);
+          toastTimeoutId = setTimeout(() => {
+            toastEl.classList.remove("toast--visible");
+            setTimeout(() => {
+              toastEl.style.display = "none";
+            }, 250);
+          }, 3500);
+        }
+
+        // Endpoints Apps Script
+        const PIPELINE_URL =
+          "https://script.google.com/macros/s/AKfycbzbB870s_6tuIjlDbN-CWPiEwVDT8r-gz3U_4iRB366JTWhoqbgvXhVld30_D807grl/exec";
+
+        // ✅ Helpers
+        function moneyMX(n) {
+          const x = Number(n) || 0;
+          return x.toLocaleString("es-MX", {
+            style: "currency",
+            currency: "MXN",
+          });
+        }
+
+        async function ejecutarPipelineMaster() {
+          const btn = document.getElementById("btnPipelineMaster");
+          const textoOriginal = btn ? btn.textContent : "";
+
+          const confirmar = confirm(
+            "¿Quieres ejecutar la actualización del Master?\n\n" +
+              "Esto correrá: códigos nuevos y precios desde Calculadora."
+          );
+          if (!confirmar) return;
+
+          try {
+            if (btn) {
+              btn.disabled = true;
+              btn.textContent = "Ejecutando...";
+            }
+
+            showLoader("Actualizando Master (códigos + precios)...");
+
+            const respuesta = await fetch(
+              PIPELINE_URL + "?action=ejecutarPipeline",
+              { cache: "no-store" }
+            );
+            const data = await respuesta.json();
+
+            if (data.success) {
+              showToast(
+                data.message ||
+                  "Pipeline ejecutado correctamente. Revisa el Master.",
+                "success"
+              );
+            } else {
+              showToast(
+                data.message || "Hubo un problema al ejecutar el pipeline.",
+                "error"
+              );
+            }
+          } catch (error) {
+            console.error(error);
+            showToast(
+              "Error al conectar con el Master. Intenta de nuevo.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = textoOriginal || "Ejecutar actualización";
+            }
+          }
+        }
+
+        async function ejecutarCSVConIVA() {
+          const btn = document.getElementById("btnCSVConIVA");
+          const textoOriginal = btn ? btn.textContent : "";
+
+          const confirmar = confirm(
+            "¿Generar el CSV con IVA?\n\n" +
+              "Esto actualizará la base que usas para SMP / etiquetas."
+          );
+          if (!confirmar) return;
+
+          try {
+            if (btn) {
+              btn.disabled = true;
+              btn.textContent = "Generando...";
+            }
+
+            showLoader("Generando CSV con IVA...");
+
+            const respuesta = await fetch(
+              PIPELINE_URL + "?action=generarCSVConIVA",
+              { cache: "no-store" }
+            );
+            const data = await respuesta.json();
+
+            if (data.success) {
+              showToast(
+                data.message ||
+                  "CSV con IVA generado correctamente. Revisa el archivo SMP.",
+                "success"
+              );
+            } else {
+              showToast(
+                data.message || "Hubo un problema al generar el CSV con IVA.",
+                "error"
+              );
+            }
+          } catch (error) {
+            console.error(error);
+            showToast(
+              "Error al conectar con el Master. Intenta de nuevo.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = textoOriginal || "Generar CSV";
+            }
+          }
+        }
+
+        async function verDashboardHoy() {
+          showLoader("Cargando resumen del día...");
+
+          try {
+            const respuesta = await fetch(
+              PIPELINE_URL + "?action=dashboardHoy",
+              { cache: "no-store" }
+            );
+            const data = await respuesta.json();
+
+            if (!data.success) {
+              showToast(
+                data.message || "No se pudo obtener el resumen del día.",
+                "error"
+              );
+              return;
+            }
+
+            const d = data.dashboard || {};
+            const ventasHoy = d.ventasHoy || 0;
+            const ticketsHoy = d.ticketsHoy || 0;
+            const ventasSemana = d.ventasSemana || 0;
+            const ventasMes = d.ventasMes || 0;
+            const prendasSinPrecio = d.prendasSinPrecio || 0;
+
+            const msg =
+              "📈 Resumen del día\n\n" +
+              "💸 Ventas hoy: " + moneyMX(ventasHoy) + "\n" +
+              "🧾 Tickets hoy: " + ticketsHoy + "\n\n" +
+              "📅 Ventas últimos 7 días: " + moneyMX(ventasSemana) + "\n" +
+              "📆 Ventas del mes: " + moneyMX(ventasMes) + "\n\n" +
+              "⚠️ Prendas sin precio en Master: " + prendasSinPrecio;
+
+            alert(msg);
+          } catch (error) {
+            console.error(error);
+            showToast(
+              "Error al conectar con el Master para el dashboard.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+          }
+        }
+
+        async function abrirBuscadorProducto() {
+          const q = prompt(
+            "Buscar producto en Master:\n\n" +
+              "Ingresa código o parte de la descripción."
+          );
+          if (!q) return;
+
+          showLoader("Buscando producto...");
+
+          try {
+            const respuesta = await fetch(
+              PIPELINE_URL + "?action=buscarProducto&q=" + encodeURIComponent(q),
+              { cache: "no-store" }
+            );
+            const data = await respuesta.json();
+
+            if (!data.success) {
+              showToast(data.message || "Error en la búsqueda.", "error");
+              return;
+            }
+
+            const resultados = data.resultados || [];
+            if (!resultados.length) {
+              showToast("No se encontraron productos para: " + q, "info");
+              return;
+            }
+
+            let texto =
+              "Resultados de búsqueda (" + resultados.length + "):\n\n";
+            resultados.slice(0, 5).forEach((item, idx) => {
+              texto +=
+                "#" +
+                (idx + 1) +
+                " " +
+                (item.codigo || "") +
+                " | " +
+                (item.descripcion || "") +
+                "\n" +
+                "Tipo: " +
+                (item.tipo || "-") +
+                " | Color: " +
+                (item.color || "-") +
+                " | Talla: " +
+                (item.talla || "-") +
+                "\n" +
+                "Precio: " +
+                (item.precio !== "" ? "$" + item.precio : "N/D") +
+                "\n\n";
+            });
+
+            alert(texto);
+          } catch (error) {
+            console.error(error);
+            showToast(
+              "Error al conectar con el Master para la búsqueda.",
+              "error"
+            );
+          } finally {
+            hideLoader();
+          }
+        }
+
+        // ✅ Register Service Worker (PWA)
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", async () => {
+            try {
+              const reg = await navigator.serviceWorker.register(
+                "/service-worker.js",
+                { scope: "/" }
+              );
+              console.log("✅ SW registrado:", reg.scope);
+            } catch (err) {
+              console.warn("❌ SW no se pudo registrar:", err);
+            }
+          });
+        }
+
+        window.ejecutarPipelineMaster = ejecutarPipelineMaster;
+        window.ejecutarCSVConIVA = ejecutarCSVConIVA;
+        window.verDashboardHoy = verDashboardHoy;
+        window.abrirBuscadorProducto = abrirBuscadorProducto;
+      }
+
+      try {
+        boot();
+      } catch (error) {
+        showFatalError("La app no pudo iniciar. Intenta recargar.", error);
+      }
+    </script>
+  </body>
+</html>

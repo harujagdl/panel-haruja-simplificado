@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora HarujaGdl</title>
+  <style>
+    :root{ --olivo:#A7B59E; --marron:#383234; --beige:#FAF6F1; --texto:#222; }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:#fff; color:var(--texto);
+      font-family: Arial, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", sans-serif;
+    }
+    .wrap{ max-width:500px; margin:0 auto; padding:20px; }
+    .card{
+      background:#fff; border-radius:12px;
+      box-shadow:0 0 8px rgba(0,0,0,.08); padding:20px;
+    }
+    .logo{ display:block; margin:10px auto 12px; max-width:180px; height:auto; }
+    h2{ text-align:center; margin:0 0 16px; font-size:28px; line-height:1.2; color:#000; }
+
+    label{display:block; margin-top:14px; font-weight:700; color:#333}
+    .hint{font-size:12px; color:#6b6b6b; margin-top:6px}
+    .error{ font-size:12px; color:#b00020; margin-top:6px }
+
+    input, select, textarea{
+      width:100%; padding:12px; margin-top:8px;
+      border:1px solid #aaa; border-radius:8px; font-size:16px;
+      background:#fff; outline:none;
+    }
+    textarea{min-height:72px; resize:vertical}
+
+    .drop{
+      border:2px dashed #ccc; border-radius:8px; padding:14px; text-align:center; cursor:pointer;
+      min-height:120px; display:flex; align-items:center; justify-content:center; flex-direction:column;
+      transition: background .15s ease;
+    }
+    .drop.dragover{background:var(--beige)}
+    .thumb{
+      margin-top:8px; width:100%; max-height:220px;
+      object-fit:contain; border-radius:8px; border:1px solid #ddd
+    }
+
+    .row{display:grid; gap:10px}
+    .grid2{grid-template-columns:1fr}
+    .grid3{grid-template-columns:1fr}
+    @media (min-width:560px){
+      .grid2{grid-template-columns:1fr 1fr}
+      .grid3{grid-template-columns:1fr 1fr 1fr}
+    }
+
+    .pill{
+      display:inline-block; padding:6px 10px; border:1px solid #ccc;
+      border-radius:999px; background:#fafafa; font-size:12px; color:#666; margin-top:8px
+    }
+
+    .actions{display:flex; gap:8px; margin-top:14px}
+    button{
+      padding:12px; width:100%; border:none; border-radius:8px;
+      cursor:pointer; font-weight:700; font-size:16px; transition: opacity .15s ease;
+    }
+    button[disabled]{ opacity:.6; cursor:not-allowed }
+    .primary{background:var(--olivo); color:#fff}
+    .ghost{background:#f1f1f1; color:#222}
+
+    #msg{margin:10px 0; font-weight:700;}
+    #msg.ok{color:#0a7a22}
+    #msg.err{color:#b00020}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="logo" src="/icons/icon-192.png" alt="HarujaGdl" />
+    <div class="card" role="form" aria-labelledby="title">
+      <h2 id="title">Calculadora de Precios</h2>
+
+      <div class="row grid2">
+        <div>
+          <label for="fecha">Fecha</label>
+          <input id="fecha" type="date" />
+          <div id="err-fecha" class="error" style="display:none"></div>
+        </div>
+        <div>
+          <label for="categoria">Categoría</label>
+          <select id="categoria" required>
+            <option value="">Selecciona...</option>
+            <option>Blusas</option>
+            <option>Pantalones</option>
+            <option>Vestidos</option>
+            <option>Faldas</option>
+            <option>Conjuntos</option>
+            <option>Chamarras</option>
+            <option>Accesorios</option>
+          </select>
+          <div id="err-categoria" class="error" style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label for="desc">Descripción breve</label>
+        <textarea id="desc" placeholder="Ej. Blusa satinada cuello V" maxlength="140" required></textarea>
+        <div class="hint" id="desc-count">0/140</div>
+        <div id="err-desc" class="error" style="display:none"></div>
+      </div>
+
+      <div class="row grid2">
+        <div>
+          <label for="costo">Costo (MXN)</label>
+          <input id="costo" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0.00" required />
+          <div id="err-costo" class="error" style="display:none"></div>
+        </div>
+
+        <div>
+          <label for="margen">Margen</label>
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <input id="margen" type="range" min="40" max="65" step="1" value="65" style="flex:1;" />
+            <input id="margenInput" type="number" min="40" max="65" step="1" value="65" inputmode="numeric" style="width:88px;" />
+          </div>
+          <span class="pill"><span id="margenPill">65%</span> editable</span>
+          <div class="hint">Puedes ajustar el margen entre 40% y 65%.</div>
+          <div id="err-margen" class="error" style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="hint">
+          <input id="chk9" type="checkbox" checked />
+          Aplicar redondeo psicológico a $9
+        </label>
+      </div>
+
+      <div class="row" aria-label="Zona de imagen">
+        <label>Imagen (arrastra y suelta o haz clic)</label>
+        <div id="drop" class="drop" tabindex="0" aria-label="Dropzone de imagen">
+          <input id="file" type="file" accept="image/*" style="display:none" />
+          <div id="dropText" class="hint">
+            Suelta aquí la imagen o haz clic para seleccionar
+          </div>
+          <img id="preview" class="thumb" style="display:none" alt="Vista previa" />
+        </div>
+        <div id="imgMsg" class="hint"></div>
+      </div>
+
+      <div class="row grid3" style="margin-top:8px">
+        <div>
+          <label for="psiniva">Precio sin IVA</label>
+          <input id="psiniva" type="text" disabled />
+        </div>
+        <div>
+          <label for="iva">IVA</label>
+          <input id="iva" type="text" disabled />
+        </div>
+        <div>
+          <label for="pfinal">Precio final (con IVA)</label>
+          <input id="pfinal" type="text" disabled />
+        </div>
+      </div>
+
+      <div id="msg" role="status" aria-live="polite"></div>
+
+      <div class="actions">
+        <button id="btnGuardar" class="primary" type="button">Guardar registro</button>
+        <button id="btnLimpiar" class="ghost" type="button">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // URL de tu Web App de Apps Script
+  const API_URL = 'https://script.google.com/macros/s/AKfycby4NNyRSFmQm-dgXf9dpTqVxBDORBtOnPywiffLNyvotUM66ZKjWCFgyIqAX-kPo_M/exec';
+
+  let IVA = 0.16;
+  let MARGEN = 0.65; // valor interno decimal: 0.40 a 0.65
+  let imageDataUrl = null;
+  let imageFileName = null;
+  let busy = false;
+
+  const $ = sel => document.querySelector(sel);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initFront();
+  });
+
+  function initFront() {
+    // Fecha hoy
+    const fecha = $('#fecha');
+    const today = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    fecha.value = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+    $('#iva').value = (IVA*100).toFixed(2) + '%';
+    setMargenFromPct(decimalToPct(MARGEN));
+
+    $('#costo').addEventListener('input', recalc);
+    $('#chk9').addEventListener('change', recalc);
+
+    $('#margen').addEventListener('input', e => {
+      setMargenFromPct(e.target.value);
+      clearMargenError();
+      recalc();
+    });
+
+    $('#margenInput').addEventListener('input', e => {
+      const raw = Number(e.target.value);
+      if (!Number.isFinite(raw)) return;
+      setMargenFromPct(raw);
+      clearMargenError();
+      recalc();
+    });
+
+    $('#margenInput').addEventListener('blur', () => {
+      const raw = Number($('#margenInput').value);
+      if (!Number.isFinite(raw)) {
+        setMargenFromPct(65);
+        showMargenError('Ingresa un margen válido entre 40 y 65.');
+      } else {
+        const clamped = clamp(raw, 40, 65);
+        setMargenFromPct(clamped);
+        if (raw !== clamped) {
+          showMargenError('El margen se ajustó automáticamente al rango permitido (40% a 65%).');
+        } else {
+          clearMargenError();
+        }
+      }
+      recalc();
+    });
+
+    $('#desc').addEventListener('input', e => {
+      $('#desc-count').textContent = `${e.target.value.length}/140`;
+    });
+
+    // Imagen
+    const drop = $('#drop');
+    const file = $('#file');
+
+    drop.addEventListener('click', () => file.click());
+    drop.addEventListener('keypress', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        file.click();
+      }
+    });
+    drop.addEventListener('dragover', e => {
+      e.preventDefault();
+      drop.classList.add('dragover');
+    });
+    drop.addEventListener('dragleave', () => {
+      drop.classList.remove('dragover');
+    });
+    drop.addEventListener('drop', e => {
+      e.preventDefault();
+      drop.classList.remove('dragover');
+      handleFile(e.dataTransfer.files?.[0]);
+    });
+    file.addEventListener('change', e => handleFile(e.target.files?.[0]));
+
+    $('#btnGuardar').addEventListener('click', guardar);
+    $('#btnLimpiar').addEventListener('click', () => limpiar(true));
+
+    recalc();
+  }
+
+  function money(n){
+    const x = Number(n);
+    if (!isFinite(x)) return '$0.00';
+    return '$' + x.toLocaleString('es-MX',{
+      minimumFractionDigits:2, maximumFractionDigits:2
+    });
+  }
+  function round2(n){ return Math.round(Number(n)*100)/100; }
+  function clamp(n, min, max){
+    return Math.min(max, Math.max(min, n));
+  }
+  function pctToDecimal(pct){
+    return Number(pct) / 100;
+  }
+  function decimalToPct(dec){
+    return Math.round(Number(dec || 0) * 100);
+  }
+  function getMargenPct(){
+    return decimalToPct(MARGEN);
+  }
+  function setMargenFromPct(pct){
+    const pctSafe = clamp(Number(pct || 0), 40, 65);
+    MARGEN = pctToDecimal(pctSafe);
+    if ($('#margen')) $('#margen').value = String(pctSafe);
+    if ($('#margenInput')) $('#margenInput').value = String(pctSafe);
+    if ($('#margenPill')) $('#margenPill').textContent = pctSafe + '%';
+  }
+  function nextEnding9(n){
+    let p = Math.ceil(Number(n)||0);
+    const mod = p % 10;
+    return (mod===9) ? p : p + (9 - mod);
+  }
+  function setMsg(text, type){
+    const el = $('#msg');
+    el.textContent = text || '';
+    el.className = type ? type : '';
+  }
+  function setImgMsg(t){ $('#imgMsg').textContent = t || ''; }
+  function showMargenError(msg){
+    const e = $('#err-margen');
+    if (!e) return;
+    e.textContent = msg || '';
+    e.style.display = msg ? 'block' : 'none';
+  }
+  function clearMargenError(){
+    const e = $('#err-margen');
+    if (!e) return;
+    e.textContent = '';
+    e.style.display = 'none';
+  }
+  function clearErrors(){
+    ['fecha','categoria','desc','costo','margen'].forEach(id => {
+      const el = $('#err-'+id);
+      if (el) { el.style.display='none'; el.textContent=''; }
+    });
+  }
+
+  function recalc(){
+    const costo = Number($('#costo').value || 0);
+    const aplicar9 = $('#chk9').checked;
+    const margenPct = Number($('#margenInput')?.value || getMargenPct());
+
+    if (isFinite(margenPct)) {
+      MARGEN = pctToDecimal(clamp(margenPct, 40, 65));
+      $('#margenPill').textContent = clamp(margenPct, 40, 65) + '%';
+    }
+
+    if (!costo || costo <= 0){
+      $('#psiniva').value = '';
+      $('#pfinal').value = '';
+      return;
+    }
+    const pSinIva = costo * (1 + MARGEN);
+    let pFinal = pSinIva * (1 + IVA);
+    if (aplicar9) pFinal = nextEnding9(pFinal);
+    $('#psiniva').value = money(pSinIva);
+    $('#pfinal').value  = money(round2(pFinal));
+  }
+
+  function handleFile(f){
+    if(!f){ return; }
+    if(String(f.type).indexOf('image/') !== 0){
+      setImgMsg('Formato no válido. Usa una imagen.');
+      return;
+    }
+    if(f.size > 5*1024*1024){
+      setImgMsg('La imagen supera 5 MB.');
+      return;
+    }
+    imageFileName = f.name || 'prenda.jpg';
+    const reader = new FileReader();
+    reader.onload = function(){
+      imageDataUrl = reader.result;
+      const img = $('#preview');
+      img.src = imageDataUrl;
+      img.style.display='block';
+      setImgMsg('Imagen cargada (se enviará al guardar).');
+    };
+    reader.readAsDataURL(f);
+  }
+
+  function validar(){
+    clearErrors();
+    let ok = true;
+    const categoria = $('#categoria').value;
+    const desc = $('#desc').value.trim();
+    const costo = Number($('#costo').value);
+    const fecha = $('#fecha').value;
+    const margenPct = Number($('#margenInput')?.value);
+
+    if (!categoria){
+      const e = $('#err-categoria');
+      e.textContent = 'Selecciona una categoría.'; e.style.display='block'; ok=false;
+    }
+    if (!desc){
+      const e = $('#err-desc');
+      e.textContent = 'Escribe una descripción.'; e.style.display='block'; ok=false;
+    }
+    if (!isFinite(costo) || costo <= 0){
+      const e = $('#err-costo');
+      e.textContent = 'Ingresa un costo válido (> 0).'; e.style.display='block'; ok=false;
+    }
+    if (!fecha){
+      const e = $('#err-fecha');
+      e.textContent = 'Selecciona una fecha.'; e.style.display='block'; ok=false;
+    }
+
+    if (!isFinite(margenPct) || margenPct < 40 || margenPct > 65){
+      const e = $('#err-margen');
+      e.textContent = 'Ingresa un margen entre 40% y 65%.';
+      e.style.display = 'block';
+      ok = false;
+    }
+
+    if (ok) {
+      setMargenFromPct(margenPct);
+    }
+
+    return ok;
+  }
+
+  function guardar(){
+    if (busy) return;
+    if (!validar()){
+      setMsg('Revisa los campos marcados.', 'err');
+      return;
+    }
+
+    const fecha = $('#fecha').value;
+    const categoria = $('#categoria').value;
+    const descripcion = $('#desc').value.trim().replace(/[\r\n]+/g,' ').slice(0,140);
+    const costo = Number($('#costo').value);
+    const margenPct = Number($('#margenInput').value);
+    const aplicarRedondeo = $('#chk9').checked;
+
+    const payload = {
+      fecha,
+      categoria,
+      descripcion,
+      costo,
+      margen: pctToDecimal(margenPct),
+      margenPct,
+      aplicarRedondeo,
+      imageDataUrl,
+      imageFileName
+    };
+
+    busy = true;
+    $('#btnGuardar').disabled = true;
+    setMsg('Guardando registro en HarujaGdl…', '');
+
+    fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (!res.ok){
+        throw new Error(res.error || 'Error desconocido del servidor.');
+      }
+
+      const calc = res.result && res.result.calculos;
+      if (calc){
+        if (typeof calc.precioSinIva === 'number')
+          $('#psiniva').value = money(calc.precioSinIva);
+        if (typeof calc.precioConIva === 'number')
+          $('#pfinal').value = money(calc.precioConIva);
+        if (typeof calc.iva === 'number')
+          $('#iva').value = (calc.iva*100).toFixed(2)+'%';
+        if (typeof calc.margen === 'number'){
+          setMargenFromPct(Number($('#margenInput')?.value || 65));
+        }
+      }
+
+      setMsg('Registro guardado con éxito ✅', 'ok');
+    })
+    .catch(err => {
+      console.error(err);
+      setMsg('Error al guardar: ' + err.message, 'err');
+    })
+    .finally(() => {
+      busy = false;
+      $('#btnGuardar').disabled = false;
+    });
+  }
+
+  function limpiar(resetMsgs){
+    $('#categoria').value = '';
+    $('#desc').value = '';
+    $('#desc-count').textContent = '0/140';
+    $('#costo').value = '';
+    imageDataUrl = null;
+    imageFileName = null;
+    $('#preview').style.display='none';
+    setImgMsg('');
+    clearErrors();
+    $('#psiniva').value = '';
+    $('#pfinal').value  = '';
+    if(resetMsgs) setMsg('', '');
+  }
+</script>
+</body>
+</html>
